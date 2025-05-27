@@ -5,5 +5,6 @@ app_name = 'extraccion'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('crear/', views.crear_extraccion, name="crear_extraccion")
+    path('crear/', views.crear_extraccion, name="crear_extraccion"),
+    path('obtener/<int:extraccion_id>/', views.obtener_extraccion, name="obtener_extraccion"),
 ]

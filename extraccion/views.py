@@ -1,13 +1,13 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
 from django.db import IntegrityError, transaction
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.response import Response
 import json
 
 from .models import Extraccion, Registro
-from .serializers import ExtraccionSerializer
+from .serializers import ExtraccionSerializer, RegistroSerializer
 
 # Create your views here.
 def index():
@@ -37,22 +37,46 @@ def crear_extraccion(request):
                     extraccion = serializer.save()
                     extraccion.refresh_from_db()
 
-                    return JsonResponse({
+                    return Response({
                         "mensaje": "Extracción creada exitosamente.",
                         "extraccion_id": extraccion.id,
                         "nombre_extraccion": extraccion.nombre
                     }, status=201)
             
             else:
-                return JsonResponse(serializer.errors, status=400)
+                return Response(serializer.errors, status=400)
         except json.JSONDecodeError:
-            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido."}, status=400)
+            return Response({"error": "El cuerpo de la solicitud no es un JSON válido."}, status=400)
         except Exception as e:
             print(f"Error inesperado al crear extracción: {e}")
-            return JsonResponse({"error": "Ocurrió un error interno del servidor."}, status=500)
+            return Response({"error": "Ocurrió un error interno del servidor."}, status=500)
     
     else:
-        return JsonResponse({"error": "Solo se permiten peticiones POST para esta operación."}, status=405)
+        return Response({"error": "Solo se permiten peticiones POST para esta operación."}, status=405)
 
-            
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def obtener_extraccion(request, extraccion_id):
+    """
+        Muestra los registros de una extraccion especifica.
+    """
 
+    try:
+        # obtenemos las extraccion
+        extraccion = get_object_or_404(Extraccion, pk=extraccion_id)
+        extraccion.refresh_from_db()
+
+        # obtenemos registros
+        registros = extraccion.registro_set.all()
+
+        serializer = RegistroSerializer(registros, many=True)
+
+        # Devuelve los datos serializados en formato JSON
+        return Response(serializer.data, status=200)
+    
+    except Extraccion.DoesNotExist:
+        return Response({"detail": "Extracción no encontrada."}, status=404)
+    except Exception as e:
+        print(f"Error inesperado al obtener registros: {e}")
+        return Response({"error": "Ocurrió un error interno del servidor al intentar obtener los registros."}, status=500)
