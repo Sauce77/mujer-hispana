@@ -26,7 +26,7 @@ class Registro(models.Model):
     estado = models.CharField(max_length=50)
     total = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
     abonado = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
-    debe = total = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
+    debe = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
     tipo = models.CharField(max_length=100)
     extraccion = models.ForeignKey(Extraccion, on_delete=models.CASCADE, null=False, blank=False)
 
