@@ -19,6 +19,7 @@ class Registro(models.Model):
     """
         Representa un dato tomado de la extraccion.
     """
+    nombre = models.CharField(max_length=200, null=False, blank=False, default="Desconocido")
     num_nota = models.CharField(max_length=200, null=True, blank=True)
     folio = models.CharField(max_length=200, null=True, blank=True)
     tienda = models.CharField(max_length=100, null=True, blank=True)

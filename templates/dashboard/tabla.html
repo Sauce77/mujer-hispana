@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Cuentas por Cobrar</h1>
+
+    <form mwethod="GET">
+        {{ form.as_p }}
+        <input type="submit" value="Filtrar">
+    </form>
+    
+    <table id="productosTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Numero Nota</th>
+                <th>Folio</th>
+                <th>Tienda</th>
+                <th>Fecha Vencimiento</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Abonado</th>
+                <th>Debe</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in datos %}
+            <tr>
+                <td>{{ registro.nombre }}</td>
+                <td>{{ registro.num_nota }}</td>
+                <td>{{ registro.folio }}</td>
+                <td>{{ registro.tienda }}</td>
+                <td>{{ registro.fecha_vencimiento }}</td>
+                <td>{{ registro.estado }}</td>
+                <td>{{ registro.total }}</td>
+                <td>{{ registro.abonado }}</td>
+                <td>{{ registro.debe }}</td>
+                <td>{{ registro.tipo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        $(document).ready(function() {
+            $('#productosTable').DataTable();
+        });
+    </script>
+
+{% endblock %}
