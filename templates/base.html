@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mujer Hispana</title>
+</head>
+<body>
+    <nav>
+        {% if user.is_authenticated %}
+            <span>Hola, {{ user.username }}!</span>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;"> 
+                {% csrf_token %} {# ¡Importante! Sin esto, fallará #}
+                <button type="submit" style="background: none; border: none; color: blue; cursor: pointer; text-decoration: underline;">Cerrar Sesión</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Iniciar Sesión</a>
+            <a href="{% url 'admin:index' %}">Administrador</a>
+        {% endif %}
+    </nav>
+    <hr>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

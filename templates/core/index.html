@@ -1,0 +1,13 @@
+{% extends 'base.html' %} {# Si tienes una plantilla base, extiéndela aquí #}
+
+{% block content %}
+    <h1>¡Bienvenido a {{ nombre_proyecto }}!</h1>
+    <p>Esta es la página de inicio de tu proyecto Django.</p>
+
+    {% if user.is_authenticated %}
+        <p>¡Hola, {{ user.username }}! Has iniciado sesión.</p>
+        <p><a href="{% url 'logout' %}">Cerrar Sesión</a></p>
+    {% else %}
+        <p>No has iniciado sesión. <a href="{% url 'login' %}">Inicia Sesión</a> o <a href="{% url 'admin:index' %}">accede al administrador</a>.</p>
+    {% endif %}
+{% endblock %}
