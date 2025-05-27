@@ -1,0 +1,14 @@
+{% extends 'base.html' %} {# Si tienes una plantilla base, extiéndela aquí #}
+
+{% block content %}
+    <h2>Iniciar Sesión</h2>
+    <form method="post">
+        {% csrf_token %} {# Esencial para la seguridad en formularios Django #}
+        {{ form.as_p }} {# Esto renderiza los campos del formulario como párrafos #}
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+
+    {% if form.errors %}
+        <p style="color: red;">Nombre de usuario o contraseña incorrectos.</p>
+    {% endif %}
+{% endblock %}

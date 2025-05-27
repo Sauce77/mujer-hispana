@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Proyecto Django</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Inicio</a>
+        {% if user.is_authenticated %}
+            <span>Hola, {{ user.username }}!</span>
+            <a href="{% url 'logout' %}">Cerrar Sesión</a>
+        {% else %}
+            <a href="{% url 'login' %}">Iniciar Sesión</a>
+            <a href="{% url 'admin:index' %}">Administrador</a> {# Opcional: enlace al admin #}
+        {% endif %}
+    </nav>
+    <hr>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>
