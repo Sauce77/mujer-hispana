@@ -9,7 +9,6 @@ import json
 from .models import Extraccion, Registro
 from .serializers import ExtraccionSerializer
 
-
 # Create your views here.
 def index():
     return "Extraccion"
@@ -25,10 +24,10 @@ def crear_extraccion(request):
     if request.method == "POST":
         try:
             # leemos contenido json
-            data = json.loads(request.body)
+            data = request.data
 
             # instancia serializer para validar
-            serializer = ExtraccionSerializer(data=data)
+            serializer = ExtraccionSerializer(data=data, context={'request': request})
 
             if serializer.is_valid():
                 # si los datos son validos llama al metodo .create()
@@ -36,12 +35,12 @@ def crear_extraccion(request):
                 with transaction.atomic():
 
                     extraccion = serializer.save()
+                    extraccion.refresh_from_db()
 
                     return JsonResponse({
                         "mensaje": "Extracción creada exitosamente.",
                         "extraccion_id": extraccion.id,
-                        "nombre_extraccion": extraccion.nombre,
-                        "cantidad_registros": extraccion.registros.count()
+                        "nombre_extraccion": extraccion.nombre
                     }, status=201)
             
             else:
