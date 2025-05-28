@@ -1,47 +1,80 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %} 
 
 {% block content %}
 
-<h1>Cuentas por Cobrar</h1>
+    <h1 class="my-4 ms-2">Cuentas por Cobrar</h1> {# Margen superior e inferior para el título #}
 
-    <form mwethod="GET">
-        {{ form.as_p }}
-        <input type="submit" value="Filtrar">
+    <form method="GET" class="mb-4 p-4 border rounded bg-light shadow-sm w-50 mx-auto"> {# Agregadas más clases Bootstrap #}
+        <h2 class="h5 mb-4 text-primary">Filtrar por Fechas</h2> {# Título con estilo Bootstrap #}
+        
+        <div class="row g-3"> {# Usa el sistema de grid de Bootstrap para alinear los campos #}
+            <div class="col-md-6"> {# Cada campo ocupará la mitad del ancho en pantallas medianas y grandes #}
+                <label for="{{ form.start_date.id_for_label }}" class="form-label">{{ form.start_date.label }}</label>
+                {{ form.start_date|add_class:"form-control" }} {# Aplica la clase form-control #}
+                {% if form.start_date.help_text %}
+                    <div class="form-text">{{ form.start_date.help_text }}</div>
+                {% endif %}
+                {% for error in form.start_date.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="col-md-6">
+                <label for="{{ form.end_date.id_for_label }}" class="form-label">{{ form.end_date.label }}</label>
+                {{ form.end_date|add_class:"form-control" }} {# Aplica la clase form-control #}
+                {% if form.end_date.help_text %}
+                    <div class="form-text">{{ form.end_date.help_text }}</div>
+                {% endif %}
+                {% for error in form.end_date.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-4 w-100 w-md-auto">
+            <i class="bi bi-funnel"></i> Filtrar {# Icono opcional de Bootstrap Icons #}
+        </button>
+        {# Opcional: Un botón para limpiar el filtro si quieres #}
+        <a href="{% url 'dashboard:tabla_registros' %}" class="btn btn-outline-secondary mt-4 ms-2 w-100 w-md-auto">
+            <i class="bi bi-arrow-counterclockwise"></i> Limpiar Filtro
+        </a>
     </form>
-    
-    <table id="productosTable" class="display" style="width:100%">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Numero Nota</th>
-                <th>Folio</th>
-                <th>Tienda</th>
-                <th>Fecha Vencimiento</th>
-                <th>Estado</th>
-                <th>Total</th>
-                <th>Abonado</th>
-                <th>Debe</th>
-                <th>Tipo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for registro in datos %}
-            <tr>
-                <td>{{ registro.nombre }}</td>
-                <td>{{ registro.num_nota }}</td>
-                <td>{{ registro.folio }}</td>
-                <td>{{ registro.tienda }}</td>
-                <td>{{ registro.fecha_vencimiento }}</td>
-                <td>{{ registro.estado }}</td>
-                <td>{{ registro.total }}</td>
-                <td>{{ registro.abonado }}</td>
-                <td>{{ registro.debe }}</td>
-                <td>{{ registro.tipo }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
+    <div class="table-responsive w-75 mx-auto"> {# Hace la tabla scrollable en pantallas pequeñas #}
+        <table id="productosTable" class="table table-striped table-hover table-bordered caption-top">
+            <caption>Listado de Cuentas por Cobrar</caption> {# Título de tabla (opcional) #}
+            <thead class="table-dark"> {# Cabecera oscura #}
+                <tr>
+                    <th>Nombre</th>
+                    <th>Numero Nota</th>
+                    <th>Folio</th>
+                    <th>Tienda</th>
+                    <th>Fecha Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th>Abonado</th>
+                    <th>Debe</th>
+                    <th>Tipo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in datos %}
+                <tr>
+                    <td>{{ registro.nombre }}</td>
+                    <td>{{ registro.num_nota }}</td>
+                    <td>{{ registro.folio }}</td>
+                    <td>{{ registro.tienda }}</td>
+                    <td>{{ registro.fecha_vencimiento }}</td>
+                    <td>{{ registro.estado }}</td>
+                    <td>{{ registro.total }}</td>
+                    <td>{{ registro.abonado }}</td>
+                    <td>{{ registro.debe }}</td>
+                    <td>{{ registro.tipo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     <script>
         $(document).ready(function() {
             $('#productosTable').DataTable();
