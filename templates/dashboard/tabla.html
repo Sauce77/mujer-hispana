@@ -5,7 +5,7 @@
 
     <h1 class="my-4 ms-2">Cuentas por Cobrar</h1> {# Margen superior e inferior para el título #}
 
-    <form method="GET" class="mb-4 p-4 border rounded bg-light shadow-sm w-50 mx-auto"> {# Agregadas más clases Bootstrap #}
+    <form method="GET" class="mb-4 p-4 border rounded bg-light shadow-sm w-25 mx-auto"> {# Agregadas más clases Bootstrap #}
         <h2 class="h5 mb-4 text-primary">Filtrar por Fechas</h2> {# Título con estilo Bootstrap #}
         
         <div class="row g-3"> {# Usa el sistema de grid de Bootstrap para alinear los campos #}
@@ -29,19 +29,25 @@
                     <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary mt-4 w-100 w-md-auto">
+                    <i class="bi bi-funnel"></i> Filtrar {# Icono opcional de Bootstrap Icons #}
+                </button>
+                {# Opcional: Un botón para limpiar el filtro si quieres #}
+            </div>
+            <div class="col">
+                <a href="{% url 'dashboard:tabla_registros' %}" class="btn btn-outline-secondary mt-4 ms-2 w-100 w-md-auto">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar Filtro
+                </a>
+            </div>
         </div>
         
-        <button type="submit" class="btn btn-primary mt-4 w-100 w-md-auto">
-            <i class="bi bi-funnel"></i> Filtrar {# Icono opcional de Bootstrap Icons #}
-        </button>
-        {# Opcional: Un botón para limpiar el filtro si quieres #}
-        <a href="{% url 'dashboard:tabla_registros' %}" class="btn btn-outline-secondary mt-4 ms-2 w-100 w-md-auto">
-            <i class="bi bi-arrow-counterclockwise"></i> Limpiar Filtro
-        </a>
+        
+        
     </form>
 
     
-    <div class="table-responsive w-75 mx-auto"> {# Hace la tabla scrollable en pantallas pequeñas #}
+    <div class="table-responsive mx-auto"> {# Hace la tabla scrollable en pantallas pequeñas #}
 
         <a href="{% url 'dashboard:exportar_a_excel' %}" class="btn btn-primary  my-2 color-white text-decoration-none">Descargar Extraccion</a>
 

@@ -36,7 +36,7 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{% url 'dashboard:mostrar_dashboard' %}">Dashboards</a></li>
-                                <li><a class="dropdown-item" href="{% url 'dashboard:tabla_registros' %}">Registros</a></li>
+                                <li><a class="dropdown-item" href="{% url 'extraccion:mostrar_extracciones' %}">Registros</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% if user.is_staff %}
                                     <li><a class="dropdown-item" href="#">Something else here</a></li>

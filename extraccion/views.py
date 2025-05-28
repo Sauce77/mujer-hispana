@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404, HttpResponse
+from django.shortcuts import render, get_object_or_404, HttpResponse, HttpResponseRedirect
 from django.db import IntegrityError, transaction
+from django.urls import reverse
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
@@ -107,9 +108,7 @@ def obtener_extraccion(request, extraccion_id):
         print(f"Error inesperado al obtener registros: {e}")
         return Response({"error": "Ocurrió un error interno del servidor al intentar obtener los registros."}, status=500)
     
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication, SessionAuthentication])
-@permission_classes([IsAuthenticated])
+
 def mostrar_extracciones(request):
     """
         Muestra todas las extracciones creadas
@@ -117,6 +116,32 @@ def mostrar_extracciones(request):
     
     extracciones = Extraccion.objects.all()
 
-    serializer = ExtraccionSerializer(extracciones, many=True)
+    if request.method == "POST":
 
-    return Response(serializer.data, status=200)
+        # obtenemos informacion de form
+        nombreExtraccion = request.POST.get("nombreExtraccion")
+        btnCrear = request.POST.get("btnCrear")
+
+        id_extraccion = request.POST.get("id_extraccion")
+        btnBorrar = request.POST.get("btnBorrar")
+        btnSeleccionar = request.POST.get("btnSeleccionar")
+
+        if btnCrear == "Crear" and nombreExtraccion:
+            return HttpResponse(nombreExtraccion)
+        elif btnBorrar:
+            # obtenemos la extraccion
+            borrar_extraccion = Extraccion.objects.get(pk=id_extraccion)
+            # borramos la extraccion
+            borrar_extraccion.delete()
+        elif btnSeleccionar:
+            # obtenemos la extraccion
+            seleccionar_extraccion = Extraccion.objects.get(pk=id_extraccion)
+            # guardamos el id de la extraccion en la sesion
+            request.session["id_extraccion"] = id_extraccion
+            return HttpResponseRedirect(reverse('dashboard:tabla_registros'))
+
+    contexto = {
+        "extracciones": extracciones,
+    }
+
+    return render(request, "extraccion/extracciones.html", contexto)
