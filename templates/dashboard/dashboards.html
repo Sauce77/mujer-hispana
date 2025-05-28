@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        text-align: center;
+        background-color: #f4f4f4;
+    }
+    h1 {
+        color: #333;
+        margin-bottom: 30px;
+    }
+    /* Modificación clave aquí para que se apilen */
+    .dashboard-layout {
+        display: flex; /* Usamos flexbox */
+        flex-direction: column; /* Apila los elementos verticalmente */
+        gap: 20px; /* Espacio entre los contenedores de los gráficos */
+        margin: 0 auto;
+        max-width: 900px; /* Un ancho máximo adecuado para una sola columna */
+        padding: 10px;
+    }
+    .chart-card {
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        text-align: center;
+        min-height: 450px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        /* Aseguramos que ocupe todo el ancho disponible en la columna */
+        width: 100%;
+    }
+    .chart-card h2 {
+        margin-top: 0;
+        color: #555;
+        font-size: 1.3em;
+        margin-bottom: 10px;
+    }
+    /* Estilos para el DIV interno generado por Plotly.js */
+    .js-plotly-plot {
+        width: 100% !important; /* Asegura que ocupe todo el ancho del .chart-card */
+        height: 100% !important; /* Asegura que ocupe toda la altura restante del .chart-card */
+        min-height: 350px; /* Altura mínima para que el gráfico se muestre bien */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+    <h1>{{ page_title }}</h1>
+    <p>Visualización interactiva de tus Cuentas por Pagar.</p>
+
+    <div class="dashboard-layout">
+
+        <div class="chart-card">
+            <h2>Saldo Pendiente por Tienda</h2>
+            {{ chart1_html | safe }}
+        </div>
+
+        <div class="chart-card">
+            <h2>Distribución del Total Original</h2>
+            {{ chart2_html | safe }}
+        </div>
+
+        <div class="chart-card">
+            <h2>Cuentas por Cobrar  (Vencimiento)</h2>
+            {{ chart3_html | safe }}
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Dashboard generado dinámicamente para Mujer Hispana.</p>
+    </footer>
+
+{% endblock %}
