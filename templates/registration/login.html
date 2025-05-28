@@ -1,14 +1,43 @@
 {% extends 'base.html' %} {# Si tienes una plantilla base, extiéndela aquí #}
 
 {% block content %}
-    <h2>Iniciar Sesión</h2>
-    <form method="post">
-        {% csrf_token %} {# Esencial para la seguridad en formularios Django #}
-        {{ form.as_p }} {# Esto renderiza los campos del formulario como párrafos #}
-        <button type="submit">Iniciar Sesión</button>
-    </form>
 
-    {% if form.errors %}
-        <p style="color: red;">Nombre de usuario o contraseña incorrectos.</p>
-    {% endif %}
+    <div class="container d-flex justify-content-center align-items-center mt-5">
+        <div class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
+            <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+            <form method="post">
+                {% csrf_token %} {# Esencial para la seguridad en formularios Django #}
+
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                {% if form.errors and not form.non_field_errors %}
+                    {# Si hay errores específicos de campo, ya se muestran bajo cada campo. #}
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+            </form>
+
+            <hr class="my-3">
+        </div>
+    </div>
+
 {% endblock %}

@@ -3,6 +3,10 @@ import datetime
 import plotly.express as px
 from plotly.offline import plot
 import pandas as pd
+from io import BytesIO
+
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 
 from extraccion.models import Extraccion
 from .forms import DateFilterForm
@@ -131,3 +135,78 @@ def mostrar_dashboard(request):
     }
 
     return render(request, 'dashboard/dashboards.html', context)
+
+
+def exportar_a_excel(request):
+    """
+        Convierte el queryset a un archivo de excel.
+    """
+
+    id_extraccion = request.session.get("id_extraccion")
+
+    if not id_extraccion:
+        extraccion_reciente = Extraccion.objects.order_by('-fecha_creacion').first()
+        id_extraccion = extraccion_reciente.id
+
+
+    extraccion = get_object_or_404(Extraccion, pk=id_extraccion)
+
+    registros = extraccion.registro_set.all().values()
+
+    # Convertir el QuerySet a un DataFrame de Pandas
+    df = pd.DataFrame(registros)
+
+    # Crear un archivo Excel en memoria
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='openpyxl')
+    df.to_excel(writer, sheet_name='Extraccion', index=False) # index=False para no incluir el índice del DataFrame
+
+    # --- 2. Acceder al workbook y worksheet para más personalización ---
+    workbook = writer.book
+    sheet = writer.sheets['Extraccion'] # Acceder a la hoja que creamos
+
+    # 2.1. Aplicar estilos a encabezados
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4CAF50", end_color="4CAF50", fill_type="solid") # Fondo verde
+    header_alignment = Alignment(horizontal="center", vertical="center")
+
+    for col_idx, cell in enumerate(sheet[1]):
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        # Ajustar ancho de columna automáticamente
+        max_length = 0
+        for i, cell_in_col in enumerate(sheet[get_column_letter(col_idx + 1)]):
+            if i == 0: continue # Skip header row for length calculation if preferred
+            try:
+                if len(str(cell_in_col.value)) > max_length:
+                    max_length = len(str(cell_in_col.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2) * 1.2
+        if adjusted_width > 0: # Ensure positive width
+            sheet.column_dimensions[get_column_letter(col_idx + 1)].width = adjusted_width
+
+    sheet.insert_rows(1, amount=3)
+
+    sheet['D1'] = "CUENTAS POR COBRAR"
+    sheet['D1'].font = Font(bold=True, size=16)
+    sheet['D1'].alignment = Alignment(horizontal='center', vertical='center')
+
+    sheet['A2'] = "Datos actualizados al:"
+    sheet['B2'] = f"{extraccion.fecha_creacion.strftime('%Y-%m-%d %H:%M')}"
+    sheet['B2'].alignment = Alignment(horizontal='left')
+    sheet['C2'] = "Total de Registros:"
+    sheet['D2'] = registros.count()
+    sheet['D2'].font = Font(bold=True)
+
+    writer.close()
+
+    # Configurar la respuesta HTTP para descargar el archivo
+    output.seek(0) # Mover el puntero al inicio del archivo
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Extraccion.xlsx"'
+    return response
