@@ -1,12 +1,17 @@
 from django.shortcuts import render, get_object_or_404, HttpResponse, HttpResponseRedirect
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from django.conf import settings
+from django.middleware.csrf import get_token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.response import Response
+import requests
 import datetime
+import time
 import json
+import os
 
 from .models import Extraccion, Registro
 from .serializers import ExtraccionSerializer, RegistroSerializer
@@ -115,6 +120,7 @@ def mostrar_extracciones(request):
     """
     
     extracciones = Extraccion.objects.all()
+    mensajes = []
 
     if request.method == "POST":
 
@@ -127,18 +133,70 @@ def mostrar_extracciones(request):
         btnSeleccionar = request.POST.get("btnSeleccionar")
 
         if btnCrear == "Crear" and nombreExtraccion:
-            return HttpResponse(nombreExtraccion)
-        elif btnBorrar:
-            # obtenemos la extraccion
-            borrar_extraccion = Extraccion.objects.get(pk=id_extraccion)
-            # borramos la extraccion
-            borrar_extraccion.delete()
+
+            # espera un poco, un poquito mas
+            time.sleep(15)
+
+            json_file_path = None
+
+            for static_dir in settings.STATICFILES_DIRS:
+                potential_path = os.path.join(static_dir, 'data', 'example.json')
+                if os.path.exists(potential_path):
+                    json_file_path = potential_path
+                    break
+            
+            # Si el JSON estuviera en una subcarpeta de 'static', por ejemplo 'static/config/data.json'
+            # deberías ajustar la ruta interna: os.path.join(static_dir, 'config', 'data.json')
+
+            if json_file_path:
+                try:
+                    # Leer el contenido del archivo JSON
+                    with open(json_file_path, 'r', encoding='utf-8') as f:
+                        extraccion_json = json.load(f)
+
+                    extraccion_json["nombre"] = nombreExtraccion
+
+                    # obtenemos las cookies de sesion
+                    csrf_token = get_token(request)
+                    id_session = request.session.session_key
+
+                    str_cookie = f"csrftoken={csrf_token}; sessionid={id_session}"
+
+                    cabecera = {
+                        "Accept": "*/*",
+                        "Content-Type": "application/json",
+                        "Cookie": str_cookie,
+                        "X-CSRFToken": csrf_token
+                    }
+
+                    # obtenemos la url del endpoint crear extraccion
+                    url_relativa = reverse('extraccion:crear_extraccion')
+                    url_absoluta = request.build_absolute_uri(url_relativa)
+
+                    respuesta = requests.post(url=url_absoluta, headers=cabecera, json=extraccion_json)
+
+                    if respuesta.status_code in [200, 201]:
+                        mensajes.append(f"Extraccion creada con éxito. Respuesta: {respuesta.json()}")
+                    else:
+                        mensajes.append(f"Error al crear extraccion. Código: {respuesta.status_code}, Error: {respuesta.text}")
+
+                except json.JSONDecodeError:
+                    return render(request, 'error.html', {'mensaje': "Error al decodificar el archivo JSON. Asegúrate de que el formato sea válido.", 'error': 400})
+                except requests.exceptions.RequestException as e:
+                    return render(request, 'error.html', {'mensaje': f"Error al conectar con la API: {e}", 'error': 500})
+                
         elif btnSeleccionar:
             # obtenemos la extraccion
             seleccionar_extraccion = Extraccion.objects.get(pk=id_extraccion)
             # guardamos el id de la extraccion en la sesion
             request.session["id_extraccion"] = id_extraccion
             return HttpResponseRedirect(reverse('dashboard:tabla_registros'))
+        elif btnBorrar:
+            # obtenemos la extraccion
+            borrar_extraccion = Extraccion.objects.get(pk=id_extraccion)
+            # borramos la extraccion
+            borrar_extraccion.delete()
+        
 
     contexto = {
         "extracciones": extracciones,
